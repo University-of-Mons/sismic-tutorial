@@ -1,1 +1,1 @@
-# seismic-tutorial
+# sismic-tutorial
