@@ -66,25 +66,25 @@ Once the statechart is designed, we can now define it into sismic. [This page](h
 
 The initial state of the statechart is a parallel state which executes in parallel the Car and the Cruise Control parts. The code then starts with the following syntax. 
 
-<div style="display: flex; justify-content: center; gap: 20px;">
-  <img src="figures/parallel-states-statechart.png">
-  <img src="figures/parallel-states-yaml.png">
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+  <img src="figures/parallel-states-statechart.png" style="max-width: 100%; height: auto;">
+  <img src="figures/parallel-states-yaml.png" style="max-width: 100%; height: auto;">
 </div>
 
 #### Composite states
 
 If we look further in the statechart, each parallel state contains a composite state. The one in Car is Moving which is composed of 4 nested states. The initial state in the composite state is Accelerating. It is declared as follows.
 
-<div style="display: flex; justify-content: center; gap: 20px;">
-  <img src="figures/car-composite-states.png">
-  <img src="figures/car-composite-states-yaml.png">
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+  <img src="figures/car-composite-states.png" style="max-width: 100%; height: auto;">
+  <img src="figures/car-composite-states-yaml.png" style="max-width: 100%; height: auto;">
 </div>
 
 #### States & transitions
 
 Now that the complex states has been defined, we can move on to the basic states. These ones are defined by their names, their external transitions (optionnal) and an on-entry code (optionnal). Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
 
-<div style="display: flex; justify-content: center; gap: 20px;">
-  <img src="figures/transition.png">
-  <img src="figures/transitions-yaml.png">
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+  <img src="figures/transition.png" style="max-width: 100%; height: auto;">
+  <img src="figures/transitions-yaml.png" style="max-width: 100%; height: auto;">
 </div>
