@@ -32,8 +32,8 @@ It is suggested to start by designing your statechart on paper or on a software 
 <p align="center"> 
    <img src="Cruise_Control/Define_statechart/Statechart.png">
 </p>
-The statechart is in 2 parts. The first part represents the behaviour of a simplified car and the second part represents the Cruise Control behaviour.
 
+The statechart is in 2 parts. The first part represents the behaviour of a simplified car and the second part represents the Cruise Control behaviour.
 
 #### Car
 
@@ -49,7 +49,6 @@ In each of these cases, each time a tick is triggered from the external clock, i
 - If it is driving, it will decrease the speed slowly
 
 We can do all the inverse steps to get back to the initial state, the engine off.
-
 
 #### Cruise Control
 
@@ -67,32 +66,25 @@ Once the statechart is designed, we can now define it into sismic. [This page](h
 
 The initial state of the statechart is a parallel state which executes in parallel the Car and the Cruise Control parts. The code then starts with the following syntax. 
 
-<p align="center"> 
-   <img src="figures/parallel-states-statechart.png"/>
-   <br><br>
-   <img src="figures/parallel-states-yaml.png"/>
-</p>
+<div style="display: flex; justify-content: center; gap: 20px;">
+  <img src="figures/parallel-states-statechart.png">
+  <img src="figures/parallel-states-yaml.png">
+</div>
 
 #### Composite states
 
 If we look further in the statechart, each parallel state contains a composite state. The one in Car is Moving which is composed of 4 nested states. The initial state in the composite state is Accelerating. It is declared as follows.
 
-<p align="center">
-   <img src="figures/car-composite-states.png"/>
-   <br><br>  
-   <img src="figures/car-composite-states-yaml.png"/>
-</p>
-
+<div style="display: flex; justify-content: center; gap: 20px;">
+  <img src="figures/car-composite-states.png">
+  <img src="figures/car-composite-states-yaml.png">
+</div>
 
 #### States & transitions
 
 Now that the complex states has been defined, we can move on to the basic states. These ones are defined by their names, their external transitions (optionnal) and an on-entry code (optionnal). Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
 
-<p align="center">
-   <img src="figures/transition.png"/>
-   <br><br> 
-   <img src="figures/transitions-yaml.png"/>
-</p>
-
-
-
+<div style="display: flex; justify-content: center; gap: 20px;">
+  <img src="figures/transition.png">
+  <img src="figures/transitions-yaml.png">
+</div>
