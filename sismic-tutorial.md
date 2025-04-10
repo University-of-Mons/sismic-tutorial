@@ -29,8 +29,9 @@ The methodology also suggests working by iterations. This means that we will go 
 
 It is suggested to start by designing your statechart on paper or on a software before implementing it for the first time in sismic.
 
-![Cruise control statechart](Cruise_Control/Define_statechart/Statechart.png)
-
+<p align="center"> 
+   <img src="Cruise_Control/Define_statechart/Statechart.png">
+</p>
 The statechart is in 2 parts. The first part represents the behaviour of a simplified car and the second part represents the Cruise Control behaviour.
 
 
@@ -66,28 +67,32 @@ Once the statechart is designed, we can now define it into sismic. [This page](h
 
 The initial state of the statechart is a parallel state which executes in parallel the Car and the Cruise Control parts. The code then starts with the following syntax. 
 
-![Parallel state in the statechart](figures/parallel-states-statechart.png)
-<br><br>  
-<img src="figures/parallel-states-yaml.png" width="400" style="display: block; margin: auto;" />
-
+<p align="center"> 
+   <img src="figures/parallel-states-statechart.png"/>
+   <br><br>
+   <img src="figures/parallel-states-yaml.png"/>
+</p>
 
 #### Composite states
 
 If we look further in the statechart, each parallel state contains a composite state. The one in Car is Moving which is composed of 4 nested states. The initial state in the composite state is Accelerating. It is declared as follows.
 
-
-<img src="figures/car-composite-states.png" style="display: block; margin: auto;" />
-<br><br>  
-<img src="figures/car-composite-states-yaml.png" style="display: block; margin: auto;" />
+<p align="center">
+   <img src="figures/car-composite-states.png"/>
+   <br><br>  
+   <img src="figures/car-composite-states-yaml.png"/>
+</p>
 
 
 #### States & transitions
 
 Now that the complex states has been defined, we can move on to the basic states. These ones are defined by their names, their external transitions (optionnal) and an on-entry code (optionnal). Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
 
-<img src="figures/transition.png" style="display: block; margin: auto;" />
-<br><br> 
-<img src="figures/transitions-yaml.png" style="display: block; margin: auto;" />
+<p align="center">
+   <img src="figures/transition.png"/>
+   <br><br> 
+   <img src="figures/transitions-yaml.png"/>
+</p>
 
 
 
