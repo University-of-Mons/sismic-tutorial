@@ -27,44 +27,46 @@ The methodology also suggests to work in an iterative way. We will do so by firs
 
 ## Design statechart
 
-We suggested that you start designing your statechart on a piece of paper or some software application before actually implementing it for the first time in SISMIC. (In our case, we used the statechart modeling capabilities of the Itemis Create tool for creating the statechart model.)
+We suggest that you start designing your statechart on a piece of paper or some software application before actually implementing it for the first time in SISMIC. (In our case, we used the statechart modeling capabilities of the Itemis Create tool for creating the statechart model.)
 
 <p align="center"> 
    <img src="Cruise_Control/Define_statechart/Statechart.png">
 </p>
 
-The statechart is composed of 2 parts. The first part represents the behaviour of a simplified car and the second part represents the Cruise Control behaviour.
+The statechart is composed of 2 parallel regions. The first region represents the behaviour of a simplified car and the second region represents the Cruise Control behaviour.
 
 #### Car
 
-The car begins with its engine off. If we press the start_stop button, the vehicle that is stationary but with the engine on. Then, by accelerating, the car is now moving and we can alter between 3 states :
-- Accelerating : We press the acceleration pedal or the Cruise Control accelerates
-- Braking : We press the brake pedal
-- Driving : We are nor accelerating, nor braking
+The statechart in the Car region starts with its engine off. If we press the start_stop button, the vehicle will be stationary but with its engine on. Then, by accelerating, the car will start moving and can alter between 3 substates :
+- Accelerating : when the driver presses the acceleration pedal or the Cruise Control accelerates
+- Braking : when the driver presses the brake pedal
+- Driving : when there is no acceleration or braking happening
 
-In each of these cases, each time a tick is triggered from the external clock, it will evaluate the speed of the car following its actual state :
+In each of these cases, whenever a tick is triggered from an external clock, the model will evaluate the speed of the car following its actual state :
 
-- If it is accelerating, it will increase the speed by a provided acceleration rate
-- If it is braking, it will decrease the speed a lot
-- If it is driving, it will decrease the speed slowly
+- If the car is accelerating, the speed will increase in function of the provided acceleration rate
+- If the car is driving, the speed will decrease slowly (to simulate the friction of the car with the road)
+   If the car is braking, the speed will be decrease much faster
 
-We can do all the inverse steps to get back to the initial state, the engine off.
+A similar process as described above can be used to return back to the engine off state.
 
 #### Cruise Control
 
-The Cruise Control part has a lot more possibilities. Only the main operations will be described to make it short.
+The statechart in the Cruise Control (CC) region is considerably more complex. Only the main operations are described below to keep things short and clear.
 
-As the car is turned on, the Cruise Control (CC) goes from Unavailable to Off. Then, when the on_off button is pressed, the CC is On and ready to take control of the speed. But before that, it has to know at which speed it has to go. For that, the driver has to accelerate to a certain speed and press the SET button. This will have for effect to activate the CC at the speed the driver was going.
+When the car engine is turned on, the CC transitions from Unavailable to Off. Then, when the on_off button is pressed, the CC transitions to On and becomes ready to take control of the car speed. But before that, it has to know at which speed it needs to remain. To do so, the driver has to accelerate to a certain speed and press the SET button. This will have for effect to activate the CC at the speed the car was driving.
 
-When the CC is activated, either it is accelerating if the current speed is below the target speed (mem_speed) or either it is not accelerating. At any moment, the driver can accelerate by itself which will Pause the CC and resume it when releasing the acceleration pedal. He can also brake, which will deactivate the CC. The target speed can be changed through the +/-/SET/RES buttons.
+When the CC is activated, either it is not accelerating, or it is accelerating if the current speed is still below the target speed (mem_speed). At any moment, the driver can decide to accelerate the car by itself. This will pause the CC and resume it when releasing the acceleration pedal. The driver can also decide to brake, which will deactivate the CC. The target speed can be changed through the +/-/SET/RES buttons.
 
-### Defining the statechart in sismic
+[TOM: I find the reference to "buttons" a bit awkward here, since the notion of buttons is a kind of GUI thingy. At the level of a statechart we do not have buttons, only events. This link between buttons and events should probably be made more clear. It seems that you are assuming that there is already some GUI that has some buttons, and that these buttons trigger events in the statechart? All of this is implicit in the current text.]
 
-Once the statechart is designed, we can now define it into sismic. [This page](https://sismic.readthedocs.io/en/latest/format.html) of the documentation explains the syntax to follow for the differents states and transitions. Here, it will be explained, in a top-down approach, how to assemble these states to define a complex statechart.
+### Defining the statechart in SISMIC
+
+Once the statechart is designed, we can now implement it in SISMIC. [This page of the SISMIC documentation](https://sismic.readthedocs.io/en/latest/format.html) explains the syntax to follow for the differents states and transitions. Here, we will be explain, in a top-down approach, how to assemble these states to define a complex statechart.
 
 #### Parallel states
 
-The initial state of the statechart is a parallel state which executes in parallel the Car and the Cruise Control parts. The code then starts with the following syntax. 
+The initial configuration of the statechart is modeled in SISMIC as two parallel state representing the Car and Cruise Control parts. The code then starts with the following syntax. 
 
 <p align="center">
 | <img src="figures/parallel-states-statechart.png">
@@ -75,14 +77,18 @@ The initial state of the statechart is a parallel state which executes in parall
 
 #### Composite states
 
-If we look further in the statechart, each parallel state contains a composite state. The one in Car is Moving which is composed of 4 nested states. The initial state in the composite state is Accelerating. It is declared as follows.
+If we look deeper in the statechart, each parallel state contains several substates, of which some or basic states and some are composite states. For example, the parallel state Car contains two basic states Engine_off and Stationary_Vehicle, and one composite substate Moving. This composite state is itself composed of 4 nested substates, of which the initial one is Accelerating. This is declared as follows.
+
+[TOM: I only count 3 nested substates, since I do not really consider the history state as a "real" substate. According to UML terminology it is a kind of "pseudo-state" that has a very specific behaviour.]
 
 | <img src="figures/car-composite-states.png"> | <img src="figures/car-composite-states-yaml.png"> |
 |----------------------------------------------|----------------------------------------------------|
 
 #### States & transitions
 
-Now that the complex states has been defined, we can move on to the basic states. These ones are defined by their names, their external transitions (optionnal) and an on-entry code (optionnal). Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
+[TOM: Doesn't it make more sense to talk about the "basic states" first, and only later the "composite states"?]
+
+Now that the composite states has been defined, we can move on to the basic states. These ones are defined by their names, their (optional) external transitions and an (optional) on-entry event. Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
 
 | <img src="figures/transition.png"> | <img src="figures/transitions-yaml.png"> |
 |------------------------------------|-------------------------------------------|
