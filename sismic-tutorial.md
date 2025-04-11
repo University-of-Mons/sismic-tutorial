@@ -1,39 +1,39 @@
-# Sismic tutorial through example
+# SISMIC tutorial by example
 
-The purpose of this tutorial is to explain how to implement and test a statechart using the [Sismic library](https://github.com/AlexandreDecan/sismic), through a complete example. It will also follow the methodology described in the scientific article [A method for testing and validating executable statechart models](https://doi.org/10.1007/s10270-018-0676-3), that is supported by Sismic.
+The purpose of this tutorial is to explain how to implement and test a statechart using [the SISMIC library](https://github.com/AlexandreDecan/sismic), by a means of a complete example created from scratch. We follow the methodology described in the scientific article [A method for testing and validating executable statechart models](https://doi.org/10.1007/s10270-018-0676-3).
 
 # Context and methodology
 
-The example in this tutorial is a statechart modelizing the Adaptative Cruise Control feature of a car. To create it with sismic and following the scientific article's methodology, we will go through the following steps :
+The example used in this tutorial is a statechart to model and simulate the Adaptative Cruise Control of a car. To create the statechart with SISMIC we will go through the following steps :
 
 1. Design phase
-   1. Design statechart
+   1. Statechart design
       1. Defining the statechart
       2. Integrating code into the statechart
-   2. Define scenarios
-   3. Define properties
-   4. Enrich statechart with contracts
-   5. Define unit tests 
-2. Getting results from tests
-3. Interface to External Components
+   2. Defining scenarios
+   3. Defining properties
+   4. Enriching the statechart with contracts
+   5. Defining unit tests 
+2. Getting results from the tests
+3. Interfacing to External Components
    1. Integrating the statechart in the code
 4. Second iteration
 
-A prior work should be done about analysing the problem by making a user-story, a UI mock-up and a component diagram but it will not be covered in this tutorial.
+According to the methodology described in the article, one should first analyse the problem by making a user story, a UI mock-up and a component diagram, but this will not be covered in the current tutorial.
 
-The methodology also suggests working by iterations. This means that we will go through all the aforementioned steps for the Cruise Control feature and then going throught theses steps again to add the Adaptative Cruise Control feature.
+The methodology also suggests to work in an iterative way. We will do so by first carrying out all the aforementioned steps for implementing a basic Cruise Control and then iterating over these steps again to add extend the model to an Adaptative Cruise Control.
 
 # Design phase
 
 ## Design statechart
 
-It is suggested to start by designing your statechart on paper or on a software before implementing it for the first time in sismic.
+We suggested that you start designing your statechart on a piece of paper or some software application before actually implementing it for the first time in SISMIC. (In our case, we used the statechart modeling capabilities of the Itemis Create tool for creating the statechart model.)
 
 <p align="center"> 
    <img src="Cruise_Control/Define_statechart/Statechart.png">
 </p>
 
-The statechart is in 2 parts. The first part represents the behaviour of a simplified car and the second part represents the Cruise Control behaviour.
+The statechart is composed of 2 parts. The first part represents the behaviour of a simplified car and the second part represents the Cruise Control behaviour.
 
 #### Car
 
