@@ -21,6 +21,8 @@ The example used in this tutorial is a statechart to model and simulate the Adap
 
 According to the methodology described in the article, one should first analyse the problem by making a user story, a UI mock-up and a component diagram, but this will not be covered in the current tutorial.
 
+[TOM: Even if the UI mock-up is not covered, don't you need it (at least a screenshot of the GUI that you have for each iteration over the cruise control) since wihout this it will be different to understand where the "events" triggered in the statechart will come from? You can simply explain that for the purpose of the tutorial example we "assume" that there is a GUI that triggers/sends events to the statechart (and that may intercept information provided by the statechart, such as the car speed and other stuff?]
+
 The methodology also suggests to work in an iterative way. We will do so by first carrying out all the aforementioned steps for implementing a basic Cruise Control and then iterating over these steps again to add extend the model to an Adaptative Cruise Control.
 
 # Design phase
