@@ -19,9 +19,13 @@ The example used in this tutorial is a statechart to model and simulate the Adap
    1. Integrating the statechart in the code
 4. Second iteration
 
-According to the methodology described in the article, one should first analyse the problem by making a user story, a UI mock-up and a component diagram, but this will not be covered in the current tutorial.
+According to the methodology described in the article, one should first analyse the problem by making a user story, a UI mock-up and a component diagram, but this will not be covered in the current tutorial. 
 
-[TOM: Even if the UI mock-up is not covered, don't you need it (at least a screenshot of the GUI that you have for each iteration over the cruise control) since wihout this it will be different to understand where the "events" triggered in the statechart will come from? You can simply explain that for the purpose of the tutorial example we "assume" that there is a GUI that triggers/sends events to the statechart (and that may intercept information provided by the statechart, such as the car speed and other stuff?]
+Here is the UI mock-up of the GUI that will interact with the statechart. Different buttons can send events to the statechart (acceleration pedal, brake pedal, engine start button, ...) and some data from the statechart can be viewved on the dashboard (the speed, the memorized speed, indicator of Cruise Control switched on).
+
+<p align="center">
+   <img src="figures/mock-up.png">
+</p>
 
 The methodology also suggests to work in an iterative way. We will do so by first carrying out all the aforementioned steps for implementing a basic Cruise Control and then iterating over these steps again to add extend the model to an Adaptative Cruise Control.
 
@@ -35,7 +39,7 @@ We suggest that you start designing your statechart on a piece of paper or some 
    <img src="Cruise_Control/Define_statechart/Statechart.png">
 </p>
 
-The statechart is composed of 2 parallel regions. The first region represents the behaviour of a simplified car and the second region represents the Cruise Control behaviour.
+The statechart is composed of 2 parallel regions. The first region represents the behaviour of a simplified car and the second region represents the Cruise Control behaviour. As described before, the statechart will interact with a GUI. Then, most of the events in the statechart are triggered by buttons (acceleration pedal, brake pedal, engine start button, ...).
 
 #### Car
 
@@ -60,7 +64,6 @@ When the car engine is turned on, the CC transitions from Unavailable to Off. Th
 
 When the CC is activated, either it is not accelerating, or it is accelerating if the current speed is still below the target speed (mem_speed). At any moment, the driver can decide to accelerate the car by itself. This will pause the CC and resume it when releasing the acceleration pedal. The driver can also decide to brake, which will deactivate the CC. The target speed can be changed through the +/-/SET/RES buttons.
 
-[TOM: I find the reference to "buttons" a bit awkward here, since the notion of buttons is a kind of GUI thingy. At the level of a statechart we do not have buttons, only events. This link between buttons and events should probably be made more clear. It seems that you are assuming that there is already some GUI that has some buttons, and that these buttons trigger events in the statechart? All of this is implicit in the current text.]
 
 ### Defining the statechart in SISMIC
 
@@ -79,18 +82,19 @@ The initial configuration of the statechart is modeled in SISMIC as two parallel
 
 #### Composite states
 
-If we look deeper in the statechart, each parallel state contains several substates, of which some or basic states and some are composite states. For example, the parallel state Car contains two basic states Engine_off and Stationary_Vehicle, and one composite substate Moving. This composite state is itself composed of 4 nested substates, of which the initial one is Accelerating. This is declared as follows.
+If we look deeper in the statechart, each parallel state contains several substates, of which some or basic states and some are composite states. For example, the parallel state Car contains two basic states Engine_off and Stationary_Vehicle, and one composite substate Moving. This composite state is itself composed of 3 nested substates, of which the initial one is Accelerating. This is declared as follows.
 
-[TOM: I only count 3 nested substates, since I do not really consider the history state as a "real" substate. According to UML terminology it is a kind of "pseudo-state" that has a very specific behaviour.]
 
 | <img src="figures/car-composite-states.png"> | <img src="figures/car-composite-states-yaml.png"> |
 |----------------------------------------------|----------------------------------------------------|
 
 #### States & transitions
 
-[TOM: Doesn't it make more sense to talk about the "basic states" first, and only later the "composite states"?]
-
 Now that the composite states has been defined, we can move on to the basic states. These ones are defined by their names, their (optional) external transitions and an (optional) on-entry event. Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
 
 | <img src="figures/transition.png"> | <img src="figures/transitions-yaml.png"> |
 |------------------------------------|-------------------------------------------|
+
+### Integrating code into the statechart
+
+
