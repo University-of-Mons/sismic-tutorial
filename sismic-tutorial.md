@@ -74,9 +74,9 @@ Once the statechart is designed, we can now implement it in SISMIC. [This page o
 The initial configuration of the statechart is modeled in SISMIC as two parallel state representing the Car and Cruise Control parts. The code then starts with the following syntax. 
 
 <p align="center">
-| <img src="figures/parallel-states-statechart.png">
-<br></br>
-<img src="figures/parallel-states-yaml.png">
+   <img src="figures/parallel-states-statechart.png">
+   <br>
+   <img src="figures/parallel-states-yaml.png">
 </p>
 
 
@@ -85,16 +85,34 @@ The initial configuration of the statechart is modeled in SISMIC as two parallel
 If we look deeper in the statechart, each parallel state contains several substates, of which some or basic states and some are composite states. For example, the parallel state Car contains two basic states Engine_off and Stationary_Vehicle, and one composite substate Moving. This composite state is itself composed of 3 nested substates, of which the initial one is Accelerating. This is declared as follows.
 
 
-| <img src="figures/car-composite-states.png"> | <img src="figures/car-composite-states-yaml.png"> |
-|----------------------------------------------|----------------------------------------------------|
+<p align="center">
+   <img src="figures/car-composite-states.png">
+   <img src="figures/car-composite-states-yaml.png">
+</p>
 
 #### States & transitions
 
 Now that the composite states has been defined, we can move on to the basic states. These ones are defined by their names, their (optional) external transitions and an (optional) on-entry event. Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
 
-| <img src="figures/transition.png"> | <img src="figures/transitions-yaml.png"> |
-|------------------------------------|-------------------------------------------|
+<p align="center">
+   <img src="figures/transition.png">
+   <img src="figures/transitions-yaml.png">
+</p>
+
 
 ### Integrating code into the statechart
 
+To execute code under certain circumstances, a statechart can include code execution in states and  transitions.
 
+Some variables are also used inside the statechart. The main one is `mem_speed` that is the memorized speed for the CC. To interact with this variable, we first need to declare it in the preamble of the statechart and we can then use it in every code section (preamble, on entry, on exit, guard, action).
+
+Here is an example of its definition in the preamble and its usage in the on-entry code of the Off state.
+
+<p align="center">
+   <img src="figures/code-in-statechart.png">
+   <img src="figures/code-in-statechart-yaml.png">
+</p>
+
+As we see in the yaml file, a preamble can be defined to execute code during the instanciation of the statechart. Here, we use this to define variables as described before. A use case of these variables is the on-entry code of the Off state which sets the memorized speed to 0. It ensures that each time we switch off or on the CC, the memorized speed will not be kept at its previous value.
+
+Code can be written in a single line or multiple lines by using `|` and writting at the next line, as done in the preamble. Each code section is written in Python. The reader may notice that some code lines are not implemented the same way it is designed in the graphical statechart, this is because some operations are done on a shared object (car). This will be covered in section 3.1.
