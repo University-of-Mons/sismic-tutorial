@@ -116,3 +116,105 @@ Here is an example of its definition in the preamble and its usage in the on-ent
 As we see in the yaml file, a preamble can be defined to execute code during the instanciation of the statechart. Here, we use this to define variables as described before. A use case of these variables is the on-entry code of the Off state which sets the memorized speed to 0. It ensures that each time we switch off or on the CC, the memorized speed will not be kept at its previous value.
 
 Code can be written in a single line or multiple lines by using `|` and writting at the next line, as done in the preamble. Each code section is written in Python. The reader may notice that some code lines are not implemented the same way it is designed in the graphical statechart, this is because some operations are done on a shared object (car). This will be covered in section 3.1.
+
+
+## Defining scenarios
+
+Behavior-driven development (BDD) scenarios provide a natural and effective way to test and validate statecharts, as the tests are directly linked to specific behaviors (i.e., events sent).
+
+In SISMIC, which uses Gherkin, we define a feature file where each test case is described in plain language. These test cases consist of a series of actions or conditions, followed by a set of expected outcomes.
+
+A second file contains the concrete implementation of these steps in Python. Here, we can either define custom code or use predefined step implementations.
+
+Here is an example of basic steps:
+
+```gherkin
+Feature: Cruise Control
+
+        ...
+
+        Scenario: Accelerate the car
+             When the vehicle is stationary
+              And I accelerate
+             Then I am accelerating
+              And the speed is 1
+
+        Scenario: Stop accelerating
+             When I am accelerating
+              And I stop accelerating
+             Then I am driving
+```
+
+
+Because in the Cruise Control statechart needs a shared object (see later why), we need to instanciate it during the creation of the statechart. Because SISMIC initiate it by itself, and hence, without our shared object, we had to do a little trick to allow this. We created a "I initialize the context" step, that is executed before any other steps. Here is its definition and usage:
+
+```py
+@when('I initialize the context')
+def initialize(context):
+    statechart = import_from_yaml(filepath='statechart.yaml')
+    car = Car()
+    inter = Interpreter(statechart, initial_context={'car':car})
+    context.interpreter = inter
+```
+
+
+```gherkin
+
+Feature: Cruise Control
+
+        Scenario: The speed is 0 when the engine is off
+             When I initialize the context
+              And the engine is off
+             Then the speed is 0
+
+        Scenario: Turn on the car
+             When I initialize the context
+              And the engine is off
+              And I press the engine_start_stop button
+             Then the vehicle is stationary
+```
+
+Some other advanced steps has been defined, for example, the possibility to accelerate to a target speed: 
+
+```py
+@when('I accelerate to {value} km/h')
+def accelerate_to(context, value):
+    context.execute_steps('when I send event accelerate with accel=100')
+    
+    while context.interpreter.context["car"].get_real_speed() <= int(value):
+        context.execute_steps('when I send event tick')
+
+    context.execute_steps('when I send event stop_accelerate')
+```
+
+Most of our features are based on previous features to avoid using too much redundant steps. To allow this, we use the "I reproduce" predefined step. Here is an example:
+
+```gherkin
+Feature: Cruise Control
+
+        Scenario: Turn on the car
+             When I initialize the context
+              And the engine is off
+              And I press the engine_start_stop button
+             Then the vehicle is stationary
+
+        Scenario: Accelerate the car
+             When the vehicle is stationary
+              And I accelerate
+             Then I am accelerating
+              And the speed is 1
+```
+```py
+map_action('the engine is off', 'I do nothing')
+map_action('I press the engine_start_stop button', 'I send event engine_start_stop_button_pressed')
+
+map_assertion('the vehicle is stationary', 'state Stationary_vehicle is active')
+map_action('the vehicle is stationary', 'I reproduce "Turn on the car"')
+
+@then('the speed is {value}')
+def speed(context, value):
+    assert context.interpreter.context["car"].get_speed() == int(value)
+```
+
+## Defining properties
+
