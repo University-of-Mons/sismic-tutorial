@@ -218,3 +218,96 @@ def speed(context, value):
 
 ## Defining properties
 
+Property statechart are used in sismic to monitor some properties. These properties define a behaviour that is supposed to be respected and a behaviour that is not supposed to happen. If a bad behaviour is detected at run-time (a final state), an error is thrown.
+
+These statecharts are defined in a YAML file, just as described before. Here is an example of property statechart and its usage.
+
+<p align="center">
+   <img src="figures/property-statechart.png"/>
+</p>
+
+```yaml
+statechart:
+  name: speed_not_null
+  root state:
+      name: speed_not_null
+      initial: Desactivated
+      states:
+        - name: Desactivated
+          transitions:
+            - target: Activated 
+              event: state entered
+              guard: event.state == 'Activated'
+        
+        - name: Activated
+          transitions:
+            - target: Desactivated
+              event: state entered
+              guard: event.state == 'On' or event.state == 'Off' or event.state == 'Unavailable'
+
+            - target: Fail 
+              event: state entered
+              guard: event.state == 'Stationary_vehicle'
+          
+        - name: Fail
+          type : final
+```
+
+This property statechart define that the Cruise Control can not be activated if the speed is 0 (stationary vehicle). To achieve this, the states Activated and Desactivated alternates and if the vehicle is stationary while the CC is Activated, then we reach the final state and throw an error.
+
+To include property statecharts in the code, we do the following:
+
+```py
+statechart = import_from_yaml(filepath='statechart.yaml')
+car = Car()
+inter = Interpreter(statechart, initial_context={'car':car})
+property_statechart = import_from_yaml(filepath="property.yaml")
+inter.bind_property_statechart(property_statechart)
+```
+
+We can bind as many property statecharts as needed to the main statechart.
+
+Some properties needs a little trick to be expressed. For example, to check that braking while the CC is Activated causes the CC to be Deactivated, we need to add an intermediate state in the property statechart. This state should be temporary and last no more than a clock tick. The reason is that Sismic cannot directly check the consequence of an event within a property statechart. Without this intermediate state, the condition might end up being false at some point, leading to a verification error. Here is the visual statechart and code to illustrate this workarount.
+
+<p align="center">
+   <img src="figures/property-statechart-2.png">
+</p>
+
+```yaml
+statechart:
+  name: desactivated_when_braking
+  root state:
+      name: desactivated_when_braking
+      initial: Desactivated
+      states:
+        - name: Desactivated
+          transitions:
+            - target: Activated 
+              event: state entered
+              guard: event.state == 'Activated'
+        
+        - name: Activated
+          transitions:
+            - target: Desactivated
+              event: state entered
+              guard: event.state == 'On' or event.state == 'Off' or event.state == 'Unavailable'
+
+            - target: Braking
+              event: event consumed
+              guard: event.event.name == 'brake'
+
+        - name: Braking
+          transitions:
+            - target: Fail
+              event: tick
+
+            - target: Desactivated
+              event: state entered
+              guard: event.state == 'On' or event.state == 'Off' or event.state == 'Unavailable'
+          
+        - name: Fail
+          type : final
+```
+
+
+## Enriching the statechart with contracts
