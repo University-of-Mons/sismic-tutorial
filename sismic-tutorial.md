@@ -311,3 +311,67 @@ statechart:
 
 
 ## Enriching the statechart with contracts
+
+Contracts are conditions to be verified during transitions, state entry, state exit or any macro step. These conditions can be set to be verified before a transition is taken or before entering a state (precondition), after a transition is taken or after exiting a state (postcondition) or both (invariants). If a contract is broken during a transition, this will raise an error. This is another way to ensure that the statechart is working properly at run-time.
+
+Contracts are integrated in the statechart YAML file, either in a state definition, either in a transition definition. Here is an example of contract in state:
+
+```yaml
+statechart:
+  name: Cruise Control
+    ...
+  root state:
+    name: Cruise Control System
+    contract:
+      - always: car.get_speed() >= 0
+      - always: not(active('Braking') and active('Activated'))
+```
+
+The contract then applies for the root state. This one is constitued of 2 invariants (defined with "always" keyword), meaning that this conditions will be verified at **each** event sent to the statechart (macro step). The conditions are defined in Python code, as in other code segments. Here, they ensure that the speed of the car is always positive or null, and that the statechart can never be in a situation where the car is braking while the cruise control is activated.
+
+Here is an another example of contract usage, in transition:
+
+```yaml
+statechart:
+  name: Cruise Control
+    ...
+  root state:
+    name: Cruise Control System
+      ...
+      
+    parallel states:
+      - name: Car
+        ...
+
+      - name: Cruise Control
+        ...
+        states:
+          ...
+          - name: On 
+            transitions:
+             ...
+              - target: Activated
+                event: set_button_pressed
+                guard: car.get_speed() < max_mem_speed and car.get_speed() > min_mem_speed and not(active('Braking'))
+                action: mem_speed = car.get_speed()
+                contract:
+                  - after: mem_speed == car.get_speed()
+
+          - name: Activated
+            ...
+            states:
+              - name: CC_driving
+                transitions:
+                  ...
+                  - target: CC_driving
+                    event: set_button_pressed
+                    guard: mem_speed < car.get_speed() and car.get_speed() < max_mem_speed
+                    action: mem_speed = car.get_speed()
+                    contract:
+                      - after: mem_speed == car.get_speed()
+```
+
+In this example, a postcondition contract (using "after" keyword) is used on a transition to ensure that the mem_speed is equal to the speed after we pressed the set button.
+
+
+## Defining unit tests
