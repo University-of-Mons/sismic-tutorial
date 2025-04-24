@@ -375,3 +375,63 @@ In this example, a postcondition contract (using "after" keyword) is used on a t
 
 
 ## Defining unit tests
+
+Finally, the last way to test and validate your statechart is by doing unit testing, as it is done with conventionnal code. It can be done using any testing library, but `unittest` will be used here. 
+
+Testing the statechart can be done by using the interpreter object, queuing event, executing them and asserting the expected results.
+
+Here is an example of some unit testing:
+
+```py
+import unittest
+class CCTests(unittest.TestCase):
+    def setUp(self):
+        statechart = import_from_yaml(filepath="statechart.yaml")
+        self.car = Car()
+        self.cc = Interpreter(statechart, initial_context={'car':self.car})
+        self.cc.execute_once()
+
+    def test_braking_when_activated(self):
+        self.cc.queue("engine_start_stop_button_pressed")
+        self.cc.queue("accelerate", accel=100)
+        self.cc.queue("tick","tick","tick","tick","on_off_button_pressed","set_button_pressed","stop_accelerate","tick","tick","tick")
+        self.cc.execute()
+        self.cc.queue("brake")
+        self.cc.execute_once()
+        self.cc.queue("stop_brake")
+        self.cc.execute_once()
+        self.assertNotIn("Activated", self.cc.configuration)
+```
+
+We can also assert that an error is raised if a variable of the statechart is modified:
+
+```py
+from sismic.exceptions import ContractError
+
+    def test_break_contract_mem_speed(self):
+        self.cc.queue("engine_start_stop_button_pressed")
+        self.cc.queue("accelerate", accel=100)
+        self.cc.queue("tick","tick","tick","tick","on_off_button_pressed","set_button_pressed","tick","tick","tick")
+        self.cc.execute()
+        with self.assertRaises(ContractError):
+            self.cc.context["mem_speed"] = 161
+            self.cc.execute_once()
+
+    def test_break_contract_stationary_when_activated(self):
+        self.cc.queue("engine_start_stop_button_pressed")
+        self.cc.queue("accelerate", accel=100)
+        self.cc.queue("tick","tick","tick","tick","on_off_button_pressed","set_button_pressed","tick","tick","tick")
+        self.cc.execute()
+        with self.assertRaises(ContractError):
+            self.car.speed = 0
+            self.cc.queue("tick")
+            self.cc.execute_once()
+```
+
+Tests can then be executed with
+
+```
+pytest tests.py
+```
+
+# Getting results from the tests
