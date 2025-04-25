@@ -15,8 +15,9 @@ The example used in this tutorial is a statechart to model and simulate the Adap
    4. Enriching the statechart with contracts
    5. Defining unit tests 
 2. Interfacing to External Components
-   1. Integrating the statechart in the code
-   2. Using a shared object
+   1. Initializing the statechart
+   2. GUI and events
+   3. Using a shared object
 3. Second iteration
 
 According to the methodology described in the article, one should first analyse the problem by making a user story, a UI mock-up and a component diagram, but this will not be covered in the current tutorial. 
@@ -485,7 +486,7 @@ thread.start()
 
 The GUI is developed using the pygame library.
 
-Here is a picture of what de GUI looks like so far:
+Here is a picture of what the GUI looks like so far:
 
 <p align="center">
   <img src="figures/gui.png">
@@ -549,3 +550,56 @@ The function is therefore called with the statechart as a parameter; it queues t
 The rest of the implementation are GUI-related and is out of scope of this tutorial. The full code is available on the GitHub.
 
 ### Using a shared object
+
+As explained before, using a Python object in the statechart is useful to hide the complexity of some functions. It is also shared with the caller program that can get the variables' value or call some functions.
+
+Here, the Car object is primarily used to manage the car’s speed based on a given acceleration. Here is a part of its implementation:
+
+```py
+class Car:
+    def __init__(self):
+        self.speed = 0
+        self.acceleration = 0
+
+    def evaluate_speed(self, mode):
+        ... # Is used to calculate the speed for a given acceleration
+
+    def is_stationary(self):
+        return self.speed == 0
+
+    def get_speed(self):
+        # returns the speed (rounded)
+        if self.speed - int(self.speed) >= 0.5:
+            return int(self.speed) + 1
+        else:
+            return int(self.speed)
+```
+
+This object is given in the initial context of the interpreter during its creation:
+```py
+statechart = import_from_yaml(filepath='statechart.yaml')
+car = Car()
+inter = Interpreter(statechart, initial_context={'car':car})
+```
+
+And can then be used from the inside of the statechart, for example in actions or guards: 
+```yaml
+    (state)
+    - name: Moving
+      initial: Accelerating
+      states:
+        - name: Accelerating
+          on entry: car.evaluate_speed(1)
+          transitions:
+            - target: Driving
+              event: stop_accelerate
+              action: car.set_acceleration(0)
+        ...
+
+      transitions:
+          ...
+        - target: Stationary_vehicle
+          guard: car.is_stationary()
+```
+
+Here, the Car object is used in the on-entry code of the Accelerating state to update the speed, and in the transition from Accelerating to Driving to set the acceleration to zero when the driver stops accelerating. It also serves as a guard condition for exiting the Moving state when the car becomes stationary.
