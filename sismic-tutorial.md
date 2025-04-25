@@ -14,10 +14,10 @@ The example used in this tutorial is a statechart to model and simulate the Adap
    3. Defining properties
    4. Enriching the statechart with contracts
    5. Defining unit tests 
-2. Getting results from the tests
-3. Interfacing to External Components
+2. Interfacing to External Components
    1. Integrating the statechart in the code
-4. Second iteration
+   2. Using a shared object
+3. Second iteration
 
 According to the methodology described in the article, one should first analyse the problem by making a user story, a UI mock-up and a component diagram, but this will not be covered in the current tutorial. 
 
@@ -378,7 +378,7 @@ In this example, a postcondition contract (using "after" keyword) is used on a t
 
 Finally, the last way to test and validate your statechart is by doing unit testing, as it is done with conventionnal code. It can be done using any testing library, but `unittest` will be used here. 
 
-Testing the statechart can be done by using the interpreter object, queuing event, executing them and asserting the expected results.
+Testing the statechart can be done by using the interpreter object provided by sismic, queuing events, executing them and then asserting the expected results.
 
 Here is an example of some unit testing:
 
@@ -434,4 +434,118 @@ Tests can then be executed with
 pytest tests.py
 ```
 
-# Getting results from the tests
+# Interfacing to External Components
+
+Now that the statechart has been defined, tested, and validated, it can be integrated into a program that runs a user interface. In this case, we will develop a graphical user interface (GUI) in Python that enables users to interact with the car and its cruise control system, both of which operate based on the implemented statechart.
+
+To achieve this, we will first develop a program that links the statechart to the GUI, and then create a shared object that abstracts the complexity of the car’s operation, enabling the statechart to interact with it through simple calls.
+
+## Integrating the statechart in the code
+
+### Initializing the statechart
+
+The statechart is initialized as follows:
+
+```py
+statechart = import_from_yaml(filepath='statechart_with_contracts.yaml')
+car = Car()
+inter = Interpreter(statechart, initial_context={'car':car})
+
+...
+
+# Instanciate property statecharts
+property_dir = os.path.join(os.getcwd(), 'property_statecharts')
+if os.path.exists(property_dir):
+    for file_path in glob.glob(os.path.join(property_dir, "*property.yaml")):
+        property_statechart = import_from_yaml(filepath=file_path)
+        inter.bind_property_statechart(property_statechart)
+
+# Initial step
+inter.execute_once()
+```
+
+The statechart (with contracts !) definition is first imported from the yaml file. Then, the interpreter is initialized with the shared object. Finally, a loop binds all the property statecharts from a directory to the interpreter. To start the statechart in its initial state, we execute the first step.
+
+To manage the acceleration and the deceleration of the car, we need to use a clock to trigger continious evaluation of the speed. This clock is implemented out of the statechart, that is, in the caller program. The clock is a thread that sends `tick` events to the statechart every 0.1 seconds. Here is its declaration:
+
+```py
+def tick_thread():
+    global inter
+    while True:
+        inter.queue("tick")
+        inter.execute()
+        time.sleep(0.1)
+
+thread = threading.Thread(target=tick_thread, daemon=True)
+thread.start() 
+```
+
+
+### GUI and events
+
+The GUI is developed using the pygame library.
+
+Here is a picture of what de GUI looks like so far:
+
+<p align="center">
+  <img src="figures/gui.png">
+</p>
+
+We have buttons that trigger events and some data visible on the screen. As designed in the statechart, each button will trigger a corresponding event in this one. For example, the engine start/stop button will raise a `engine_start_stop_button_pressed` even.
+
+In the program, each button is associated to a function as follows:
+
+```py
+button_actions = {
+    "RES": action_res,
+    "SET": action_set,
+    "-": action_minus,
+    "+": action_plus,
+    "MODE": action_mode,
+    "ON/OFF": action_on_off,
+    "DIST": action_dist,
+    "ACCEL": action_accel,
+    "BRAKE": action_brake,
+    "ENGINE": action_engine,
+}
+```
+
+The function can be defined elsewhere in the code, here is an example of such function:
+```py
+def action_res(statechart):
+    print("Action RES")
+    statechart.queue("res_button_pressed")
+    statechart.execute_once()
+
+def action_set(statechart):
+    print("Action SET")
+    statechart.queue("set_button_pressed")
+    statechart.execute_once()
+```
+
+Finally, these functions are called by events of mouse at certains positions in the main loop of the display: 
+```py
+# Infinite loop for the display
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        # button press
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = event.pos
+            for button_name, rect in buttons_rects.items():
+                if rect.collidepoint(mouse_pos):
+                    action = button_actions.get(button_name)
+                    if action:
+                        action(inter)
+                        ...
+    ...
+```
+
+The function is therefore called with the statechart as a parameter; it queues the event and executes it.
+
+The rest of the implementation are GUI-related and is out of scope of this tutorial. The full code is available on the GitHub.
+
+### Using a shared object
