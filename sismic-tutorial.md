@@ -603,3 +603,26 @@ And can then be used from the inside of the statechart, for example in actions o
 ```
 
 Here, the Car object is used in the on-entry code of the Accelerating state to update the speed, and in the transition from Accelerating to Driving to set the acceleration to zero when the driver stops accelerating. It also serves as a guard condition for exiting the Moving state when the car becomes stationary.
+
+
+# Second iteration
+
+Following the methodology described in the scientific article, we can iterate to add new features to our program. Here, we will improve our Cruise Control to an Adaptative Cruise Control, that is, allowing the car to slow down if the security distance with the front car is not respected.
+
+### Statechart design
+
+The statechart was slightly modified to allow the car to brake by itself. It followed the same logic as for the acceleration. Brake is now a parametrized event that the Cruise Control part can raise. A new shared object was introducted, it's a `FrontCar` object which returns the distance to the front car, as a sensor would do.
+
+The statechart is now as the following:
+
+<p>
+<img src="figures/acc-statechart.png">
+</p>
+
+### Adapting and adding tests
+
+By adding features, some tests may not work anymore. It was the case here, as we changed the logic behind some components, mainly about the brake that is now parametrized. Hence, only some changes in the steps file is necessary.
+
+As described before, for a new feature, BDD tests, unit tests, property statecharts and contracts should be added to ensure the correctness of the statechart.
+
+
