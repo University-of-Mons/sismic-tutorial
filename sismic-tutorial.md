@@ -22,7 +22,7 @@ The example used in this tutorial is a statechart to model and simulate the Adap
 
 According to the methodology described in the article, one should first analyse the problem by making a user story, a UI mock-up and a component diagram, but this will not be covered in the current tutorial. 
 
-Here is the UI mock-up of the GUI that will interact with the statechart. Different buttons can send events to the statechart (acceleration pedal, brake pedal, engine start button, ...) and some data from the statechart can be viewved on the dashboard (the speed, the memorized speed, indicator of Cruise Control switched on).
+Here is the UI mock-up of the GUI that will interact with the statechart. Different buttons can send events to the statechart (acceleration pedal, brake pedal, engine start button, ...) and some data from the statechart can be viewed on the dashboard (the speed, the memorized speed, indicator of Cruise Control switched on).
 
 <p align="center">
    <img src="figures/mock-up.png">
@@ -55,7 +55,7 @@ In each of these cases, whenever a tick is triggered from an external clock, the
 - If the car is driving, the speed will decrease slowly (to simulate the friction of the car with the road)
    If the car is braking, the speed will be decrease much faster
 
-A similar process as described above can be used to return back to the engine off state.
+A similar process as described above can be used to go back to the engine off state.
 
 #### Cruise Control
 
@@ -68,7 +68,7 @@ When the CC is activated, either it is not accelerating, or it is accelerating i
 
 ### Defining the statechart in SISMIC
 
-Once the statechart is designed, we can now implement it in SISMIC. [This page of the SISMIC documentation](https://sismic.readthedocs.io/en/latest/format.html) explains the syntax to follow for the differents states and transitions. Here, we will be explain, in a top-down approach, how to assemble these states to define a complex statechart.
+Once the statechart is designed, we can now implement it in SISMIC. [This page of the SISMIC documentation](https://sismic.readthedocs.io/en/latest/format.html) explains the syntax to follow for the different states and transitions. Here, we will explain, in a top-down approach, how to assemble these states to define a complex statechart.
 
 #### Parallel states
 
@@ -93,7 +93,7 @@ If we look deeper in the statechart, each parallel state contains several substa
 
 #### States & transitions
 
-Now that the composite states has been defined, we can move on to the basic states. These ones are defined by their names, their (optional) external transitions and an (optional) on-entry event. Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
+Now that the composite states has been defined, we can move on to the basic states. These are defined by their names, their (optional) external transitions and an (optional) on-entry event. Code execution in states will be discussed in the next section. Here is an example of transitions' definition.
 
 <p align="center">
    <img src="figures/transition.png">
@@ -114,9 +114,9 @@ Here is an example of its definition in the preamble and its usage in the on-ent
    <img src="figures/code-in-statechart-yaml.png">
 </p>
 
-As we see in the yaml file, a preamble can be defined to execute code during the instanciation of the statechart. Here, we use this to define variables as described before. A use case of these variables is the on-entry code of the Off state which sets the memorized speed to 0. It ensures that each time we switch off or on the CC, the memorized speed will not be kept at its previous value.
+As we see in the yaml file, a preamble can be defined to execute code during the instantiation of the statechart. Here, we use this to define variables as described before. A use case of these variables is the on-entry code of the Off state which sets the memorized speed to 0. It ensures that each time we switch off or on the CC, the memorized speed will not be kept at its previous value.
 
-Code can be written in a single line or multiple lines by using `|` and writting at the next line, as done in the preamble. Each code section is written in Python. The reader may notice that some code lines are not implemented the same way it is designed in the graphical statechart, this is because some operations are done on a shared object (car). This will be covered in section 3.1.
+Code can be written in a single line or multiple lines by using `|` and writing at the next line, as done in the preamble. Each code section is written in Python. The reader may notice that some code lines are not implemented the same way it is designed in the graphical statechart, this is because some operations are done on a shared object (car). This will be covered in section 3.1.
 
 
 ## Defining scenarios
@@ -147,7 +147,7 @@ Feature: Cruise Control
 ```
 
 
-Because in the Cruise Control statechart needs a shared object (see later why), we need to instanciate it during the creation of the statechart. Because SISMIC initiate it by itself, and hence, without our shared object, we had to do a little trick to allow this. We created a "I initialize the context" step, that is executed before any other steps. Here is its definition and usage:
+Because in the Cruise Control statechart needs a shared object (see later why), we need to instantiate it during the creation of the statechart. Because SISMIC initiate it by itself, and hence, without our shared object, we had to do a little trick to allow this. We created a "I initialize the context" step, that is executed before any other steps. Here is its definition and usage:
 
 ```py
 @when('I initialize the context')
@@ -188,7 +188,7 @@ def accelerate_to(context, value):
     context.execute_steps('when I send event stop_accelerate')
 ```
 
-Most of our features are based on previous features to avoid using too much redundant steps. To allow this, we use the "I reproduce" predefined step. Here is an example:
+Most of our features are based on previous features to avoid using too many redundant steps. To allow this, we use the "I reproduce" predefined step. Here is an example:
 
 ```gherkin
 Feature: Cruise Control
@@ -268,7 +268,7 @@ inter.bind_property_statechart(property_statechart)
 
 We can bind as many property statecharts as needed to the main statechart.
 
-Some properties needs a little trick to be expressed. For example, to check that braking while the CC is Activated causes the CC to be Deactivated, we need to add an intermediate state in the property statechart. This state should be temporary and last no more than a clock tick. The reason is that Sismic cannot directly check the consequence of an event within a property statechart. Without this intermediate state, the condition might end up being false at some point, leading to a verification error. Here is the visual statechart and code to illustrate this workarount.
+Some properties need a little trick to be expressed. For example, to check that braking while the CC is Activated causes the CC to be Deactivated, we need to add an intermediate state in the property statechart. This state should be temporary and last no more than a clock tick. The reason is that Sismic cannot directly check the consequence of an event within a property statechart. Without this intermediate state, the condition might end up being false at some point, leading to a verification error. Here is the visual statechart and code to illustrate this workaround.
 
 <p align="center">
    <img src="figures/property-statechart-2.png">
@@ -328,9 +328,9 @@ statechart:
       - always: not(active('Braking') and active('Activated'))
 ```
 
-The contract then applies for the root state. This one is constitued of 2 invariants (defined with "always" keyword), meaning that this conditions will be verified at **each** event sent to the statechart (macro step). The conditions are defined in Python code, as in other code segments. Here, they ensure that the speed of the car is always positive or null, and that the statechart can never be in a situation where the car is braking while the cruise control is activated.
+The contract then applies for the root state. This one is constituted of 2 invariants (defined with "always" keyword), meaning that this conditions will be verified at **each** event sent to the statechart (macro step). The conditions are defined in Python code, as in other code segments. Here, they ensure that the speed of the car is always positive or null, and that the statechart can never be in a situation where the car is braking while the cruise control is activated.
 
-Here is an another example of contract usage, in transition:
+Here is another example of contract usage, in transition:
 
 ```yaml
 statechart:
@@ -377,7 +377,7 @@ In this example, a postcondition contract (using "after" keyword) is used on a t
 
 ## Defining unit tests
 
-Finally, the last way to test and validate your statechart is by doing unit testing, as it is done with conventionnal code. It can be done using any testing library, but `unittest` will be used here. 
+Finally, the last way to test and validate your statechart is by doing unit testing, as it is done with conventional code. It can be done using any testing library, but `unittest` will be used here. 
 
 Testing the statechart can be done by using the interpreter object provided by sismic, queuing events, executing them and then asserting the expected results.
 
@@ -467,7 +467,7 @@ inter.execute_once()
 
 The statechart (with contracts !) definition is first imported from the yaml file. Then, the interpreter is initialized with the shared object. Finally, a loop binds all the property statecharts from a directory to the interpreter. To start the statechart in its initial state, we execute the first step.
 
-To manage the acceleration and the deceleration of the car, we need to use a clock to trigger continious evaluation of the speed. This clock is implemented out of the statechart, that is, in the caller program. The clock is a thread that sends `tick` events to the statechart every 0.1 seconds. Here is its declaration:
+To manage the acceleration and the deceleration of the car, we need to use a clock to trigger continuous evaluation of the speed. This clock is implemented out of the statechart, that is, in the caller program. The clock is a thread that sends `tick` events to the statechart every 0.1 seconds. Here is its declaration:
 
 ```py
 def tick_thread():
@@ -524,7 +524,7 @@ def action_set(statechart):
     statechart.execute_once()
 ```
 
-Finally, these functions are called by events of mouse at certains positions in the main loop of the display: 
+Finally, these functions are called by events of mouse at certain positions in the main loop of the display: 
 ```py
 # Infinite loop for the display
 running = True
@@ -611,7 +611,7 @@ Following the methodology described in the scientific article, we can iterate to
 
 ### Statechart design
 
-The statechart was slightly modified to allow the car to brake by itself. It followed the same logic as for the acceleration. Brake is now a parametrized event that the Cruise Control part can raise. A new shared object was introducted, it's a `FrontCar` object which returns the distance to the front car, as a sensor would do.
+The statechart was slightly modified to allow the car to brake by itself. It followed the same logic as for the acceleration. Brake is now a parametrized event that the Cruise Control part can raise. A new shared object was introduced, it's a `FrontCar` object which returns the distance to the front car, as a sensor would do.
 
 The statechart is now as the following:
 
