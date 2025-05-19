@@ -8,7 +8,7 @@ statechart:
     name: Cruise Control System
     contract:
       - always: car.get_speed() >= 0
-      - always: not(active('Braking') and active('Activated'))
+      - always: not((active('Braking') and car.deceleration == 100) and active('Activated'))
       
     parallel states:
       - name: Car
@@ -37,10 +37,12 @@ statechart:
                 transitions:
                   - target: Driving
                     event: stop_accelerate
-                    action: car.set_acceleration(0)
 
               - name: Driving
-                on entry: car.evaluate_speed(0)
+                on entry: |
+                  car.evaluate_speed(0)
+                  car.set_acceleration(0)
+                  car.set_deceleration(0)
                 transitions:
                   - target: Accelerating
                     event: accelerate
@@ -48,7 +50,7 @@ statechart:
 
                   - target: Braking
                     event: brake
-                    action: car.set_acceleration(0)
+                    action: car.set_deceleration(event.decel)
 
               - name: Braking
                 on entry: car.evaluate_speed(2)
@@ -88,6 +90,7 @@ statechart:
             transitions:
               - target: Unavailable
                 guard: active('Engine_off')
+                action: mem_speed = 0
               
               - target: Off 
                 event: on_off_button_pressed
@@ -115,7 +118,7 @@ statechart:
                   - target: CC_accelerating
                     event: tick
                     guard: car.get_speed() < mem_speed
-                    action: send('accelerate', accel=(car.compute_acceleration(mem_speed + 1)))
+                    action: send('accelerate', accel=(min(car.compute_acceleration(mem_speed + 1), car.compute_target_speed(front_car.distance_to()) - 1)))
 
                   - target: CC_driving
                     event: set_button_pressed
@@ -124,8 +127,10 @@ statechart:
                     contract:
                       - after: mem_speed == car.get_speed()
 
-                  - target: Paused
-                    event: accelerate
+                  - target: CC_braking
+                    guard: car.get_speed()**2 / 50 > front_car.distance_to()
+                    action: send('brake', decel=(car.compute_deceleration(car.compute_target_speed(front_car.distance_to()) - 1)))
+
 
               - name: CC_accelerating
                 transitions:
@@ -134,15 +139,27 @@ statechart:
                     guard: car.get_speed() >= mem_speed + 1
                     action: send('stop_accelerate')
 
-                  - target: Paused
-                    event: accelerate
-                    guard: event.accel == 100 # Prevents the CC from leaving this state. 100 accel is only provided by human
-                    action: car.set_acceleration(100)
-
                   - target: CC_accelerating
                     event: tick
                     guard: car.get_speed() < mem_speed + 1
-                    action: car.set_acceleration(car.compute_acceleration(mem_speed + 1))
+                    action: car.set_acceleration(min(car.compute_acceleration(mem_speed + 1), car.compute_target_speed(front_car.distance_to()) - 1))
+
+                  - target: CC_braking
+                    guard: car.get_speed()**2 / 50 > front_car.distance_to()
+                    action: |
+                      send('stop_accelerate')
+                      send('brake', decel=(car.compute_deceleration(car.compute_target_speed(front_car.distance_to()) - 1)))
+
+              - name: CC_braking
+                transitions:
+                  - target: CC_driving
+                    guard: (car.get_speed()**2 / 50) <= front_car.distance_to()
+                    action: send('stop_brake')
+
+                  - target: CC_braking
+                    event: tick
+                    guard: car.get_speed()**2 / 50 > front_car.distance_to()
+                    action: car.set_deceleration(car.compute_deceleration(car.compute_target_speed(front_car.distance_to()) - 1))
 
 
               - name: Paused
@@ -176,9 +193,15 @@ statechart:
 
               - target: On
                 event: brake
+                guard: event.decel == 100
                 action: |
                   send('stop_accelerate')
-                  send('brake')
+                  send('brake', decel=100)
 
               - target: On
                 event: on_off_button_pressed
+
+              - target: Paused
+                event: accelerate
+                guard: event.accel == 100 # Prevents the CC from leaving this state. 100 accel is only provided by human
+                action: car.set_acceleration(100)
