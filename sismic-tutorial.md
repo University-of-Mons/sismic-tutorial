@@ -28,7 +28,7 @@ Here is the UI mock-up of the GUI that will interact with the statechart. Differ
    <img src="figures/mock-up.png">
 </p>
 
-The methodology also suggests to work in an iterative way. We will do so by first carrying out all the aforementioned steps for implementing a basic Cruise Control and then iterating over these steps again to add extend the model to an Adaptative Cruise Control.
+The methodology also suggests to work in an iterative way. We will do so by first carrying out all the aforementioned steps for implementing a basic Cruise Control and then iterating over these steps again to add extend the model to an Adaptative Cruise Control. All the files of this tutorial can be found on [this GitHub repository](https://github.com/University-of-Mons/sismic-tutorial).
 
 # Design phase
 
