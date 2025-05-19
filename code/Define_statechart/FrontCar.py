@@ -19,8 +19,6 @@ class FrontCar:
                 self.distanceTo = self.upper_bound
                 self.accelerating = False
 
-        print(self.distanceTo)
-
 
     def distance_to(self):
         return int(self.distanceTo)

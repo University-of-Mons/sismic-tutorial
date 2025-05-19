@@ -519,12 +519,10 @@ button_actions = {
 The function can be defined elsewhere in the code, here is an example of such function:
 ```py
 def action_res(statechart):
-    print("Action RES")
     statechart.queue("res_button_pressed")
     statechart.execute_once()
 
 def action_set(statechart):
-    print("Action SET")
     statechart.queue("set_button_pressed")
     statechart.execute_once()
 ```

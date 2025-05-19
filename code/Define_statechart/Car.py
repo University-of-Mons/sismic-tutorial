@@ -13,16 +13,13 @@ class Car:
         match(mode):
             case 0:
                 self.speed -= (self.speed * resistance * time_interval) 
-                print(f"Driving : {self.speed}")
             case 1:
                 self.speed += (total_acceleration * time_interval) - (self.speed * resistance * time_interval)
-                print(f"Accelerating : {self.speed}")
             case 2:
                 if self.speed >= 0:
                     self.speed -= (deceleration_factor * time_interval)
                     if self.speed < 0:
                         self.speed = 0
-                print(f"Braking : {self.speed}")
 
     def is_stationary(self):
         return self.speed == 0
@@ -53,8 +50,6 @@ class Car:
         if acceleration >= 100:
             acceleration = 99
 
-        print(f"accel : {acceleration}")
-
 
         return acceleration
 
@@ -67,8 +62,6 @@ class Car:
         
         if deceleration >= 100:
             deceleration = 99
-
-        print(f"decel : {deceleration}")
 
         return deceleration
     

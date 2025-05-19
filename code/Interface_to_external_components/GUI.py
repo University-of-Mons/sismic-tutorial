@@ -188,57 +188,46 @@ buttons_rects["ENGINE"] = pygame.Rect(engine_button_pos[0], engine_button_pos[1]
 
 # Actions associated with buttons
 def action_res(statechart):
-    print("Action RES")
     statechart.queue("res_button_pressed")
     statechart.execute_once()
 
 def action_set(statechart):
-    print("Action SET")
     statechart.queue("set_button_pressed")
     statechart.execute_once()
 
 def action_minus(statechart):
-    print("Action - ")
     statechart.queue("minus_button_pressed")
     statechart.execute_once()
 
 def action_plus(statechart):
-    print("Action +")
     statechart.queue("plus_button_pressed")
     statechart.execute_once()
 
 def action_mode(statechart):
-    print("Action MODE")
     statechart.queue("mode_button_pressed")
     statechart.execute_once()
 
 def action_on_off(statechart):
-    print("Action ON/OFF")
     statechart.queue("on_off_button_pressed")
     statechart.execute_once()
 
 def action_dist(statechart):
-    print("Action DIST")
     statechart.queue("mode_button_pressed")
     statechart.execute_once()
 
 def action_accel(statechart):
-    print("Action ACCEL")
     statechart.queue("accelerate",accel=100)
     statechart.execute_once()
 
 def action_brake(statechart):
-    print("Action BRAKE")
     statechart.queue("brake", decel=100)
     statechart.execute_once()
 
 def action_accel_released(statechart):
-    print("ACCEL released")
     statechart.queue("stop_accelerate")
     statechart.execute_once()
 
 def action_brake_released(statechart):
-    print("BRAKE released")
     statechart.queue("stop_brake")
     statechart.execute_once()
 
@@ -248,7 +237,6 @@ def action_engine(statechart):
         engine_on = not engine_on
         statechart.queue("engine_start_stop_button_pressed")
         statechart.execute_once()
-        print("Engine is now", "ON" if engine_on else "OFF")
         
 # Link the names with the funtions
 button_actions = {
