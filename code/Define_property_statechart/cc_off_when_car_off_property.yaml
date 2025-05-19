@@ -1,0 +1,24 @@
+statechart:
+  name: CC_off_when_car_off
+  root state:
+      name: CC_off_when_car_off
+      initial: Engine_off
+      states:
+        - name: Engine_off
+          transitions:
+            - target: Engine_on 
+              event: state entered
+              guard: event.state == 'Stationary_vehicle'
+
+            - target: Fail
+              event: state entered
+              guard: event.state == 'On' or event.state == 'Activated'
+        
+        - name: Engine_on
+          transitions:
+            - target: Engine_off
+              event: state entered
+              guard: event.state == 'Engine_off'
+          
+        - name: Fail
+          type : final

@@ -1,0 +1,24 @@
+statechart:
+  name: speed_not_null
+  root state:
+      name: speed_not_null
+      initial: Desactivated
+      states:
+        - name: Desactivated
+          transitions:
+            - target: Activated 
+              event: state entered
+              guard: event.state == 'Activated'
+        
+        - name: Activated
+          transitions:
+            - target: Desactivated
+              event: state entered
+              guard: event.state == 'On' or event.state == 'Off' or event.state == 'Unavailable'
+
+            - target: Fail 
+              event: state entered
+              guard: event.state == 'Stationary_vehicle'
+          
+        - name: Fail
+          type : final

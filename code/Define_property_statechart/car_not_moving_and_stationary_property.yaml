@@ -1,0 +1,40 @@
+statechart:
+  name: car_not_moving_and_stationary
+  root state:
+      name: car_not_moving_and_stationary
+      initial: Engine_off
+      states:
+        - name: Engine_off
+          transitions:
+            - target: Stationary_vehicle 
+              event: event sent
+              guard: event.event.name == 'engine_start_stop_button_pressed'
+        
+        - name: Stationary_vehicle
+          transitions:
+            - target: Engine_off 
+              event: event sent
+              guard: event.event.name == 'engine_start_stop_button_pressed'
+
+            - target: Moving
+              event: event sent
+              guard: event.event.name == 'accelerate'
+
+        - name: Moving
+          transitions:
+            - target: Stopped_moving
+              guard: car.is_stationary()
+              
+        - name: Stopped_moving
+          transitions:
+            - target: Stationary_vehicle
+              event: state entered
+              guard: event.state == 'Stationary_vehicle'
+
+            - target: Fail
+              event: event sent
+              guard: event.event.name == 'tick'
+        
+          
+        - name: Fail
+          type : final

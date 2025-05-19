@@ -1,0 +1,33 @@
+statechart:
+  name: desactivated_when_braking
+  root state:
+      name: desactivated_when_braking
+      initial: Desactivated
+      states:
+        - name: Desactivated
+          transitions:
+            - target: Activated 
+              event: state entered
+              guard: event.state == 'Activated'
+        
+        - name: Activated
+          transitions:
+            - target: Desactivated
+              event: state entered
+              guard: event.state == 'On' or event.state == 'Off' or event.state == 'Unavailable'
+
+            - target: Braking
+              event: event consumed
+              guard: event.event.name == 'brake'
+
+        - name: Braking
+          transitions:
+            - target: Fail
+              event: tick
+
+            - target: Desactivated
+              event: state entered
+              guard: event.state == 'On' or event.state == 'Off' or event.state == 'Unavailable'
+          
+        - name: Fail
+          type : final

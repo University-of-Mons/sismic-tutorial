@@ -1,0 +1,38 @@
+statechart:
+  name: car_off_and_moving_alternating
+  root state:
+      name: car_off_and_moving_alternating
+      initial: Engine_off
+      states:
+        - name: Engine_off
+          transitions:
+            - target: Stationary_vehicle
+              event: event consumed
+              guard: event.event.name == 'engine_start_stop_button_pressed'
+
+            - target: Fail
+              event: state entered
+              guard: event.state == 'Moving'
+
+        - name: Stationary_vehicle
+          transitions:
+            - target: Moving
+              event: event consumed
+              guard: event.event.name == 'accelerate'
+            
+            - target: Engine_off
+              event: event consumed
+              guard: event.event.name == 'engine_start_stop_button_pressed'
+
+        - name: Moving
+          transitions:
+            - target: Stationary_vehicle
+              event: state entered
+              guard: event.state == 'Stationary_vehicle'
+
+            - target: Fail
+              event: state entered
+              guard: event.state == 'Engine_off'
+
+        - name: Fail
+          type : final

@@ -28,7 +28,12 @@ Here is the UI mock-up of the GUI that will interact with the statechart. Differ
    <img src="figures/mock-up.png">
 </p>
 
-The methodology also suggests to work in an iterative way. We will do so by first carrying out all the aforementioned steps for implementing a basic Cruise Control and then iterating over these steps again to add extend the model to an Adaptative Cruise Control. All the files of this tutorial can be found on [this GitHub repository](https://github.com/University-of-Mons/sismic-tutorial).
+The methodology also suggests to work in an iterative way. We will do so by first carrying out all the aforementioned steps for implementing a basic Cruise Control and then iterating over these steps again to add extend the model to an Adaptative Cruise Control. All the files of this tutorial can be found on [this GitHub repository](https://github.com/University-of-Mons/sismic-tutorial). The program can then be executed with 
+```shell
+pip install -r requirements.txt
+
+python3 Interface_to_external_components/GUI.py
+```
 
 # Design phase
 
@@ -37,7 +42,7 @@ The methodology also suggests to work in an iterative way. We will do so by firs
 We suggest that you start designing your statechart on a piece of paper or some software application before actually implementing it for the first time in SISMIC. (In our case, we used the statechart modeling capabilities of the Itemis Create tool for creating the statechart model.)
 
 <p align="center"> 
-   <img src="Cruise_Control/Define_statechart/Statechart.png">
+   <img src="figures/Statechart.png">
 </p>
 
 The statechart is composed of 2 parallel regions. The first region represents the behaviour of a simplified car and the second region represents the Cruise Control behaviour. As described before, the statechart will interact with a GUI. Then, most of the events in the statechart are triggered by buttons (acceleration pedal, brake pedal, engine start button, ...).
